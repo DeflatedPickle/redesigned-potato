@@ -1,0 +1,7 @@
+<radial>
+    <!-- A set of buttons to circle the mouse pointer /-->
+    <button text="Button 1"/>
+    <button text="Button 2"/>
+    <button text="Button 3"/>
+    <button text="Button 4"/>
+</radial>
