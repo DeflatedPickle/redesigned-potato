@@ -2,12 +2,14 @@ package com.deflatedpickle.radialmenu
 
 import com.thoughtworks.xstream.XStream
 import java.awt.*
+import java.awt.event.ActionListener
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.util.*
 import javax.swing.JButton
 import javax.swing.JFrame
 import javax.swing.JPanel
+import javax.swing.Timer
 import javax.swing.UIManager
 
 
@@ -17,11 +19,36 @@ fun main(args: Array<String>) {
     xStream.processAnnotations(Radial::class.java)
     xStream.processAnnotations(Button::class.java)
     val resultXML = xStream.fromXML(ClassLoader.getSystemResource("radial.xml")) as Radial
-    
+
+    // TODO: Move these to the XML file
+    val width = 1 * Toolkit.getDefaultToolkit().screenResolution
+    val height = 1 * Toolkit.getDefaultToolkit().screenResolution / 2
+
+    val radius = 10 * Toolkit.getDefaultToolkit().screenResolution / 8
+
+    var radialOpen = false
+    var centre = Point()
+
     // Frame
     val frame = JFrame("RadialMenu")
 
-    val panel = JPanel(true)
+    val panel = object : JPanel(true) {
+        override fun paintComponent(g: Graphics) {
+            super.paintComponent(g)
+
+            if (!radialOpen) return
+
+            if (resultXML.connections) {
+                g.color = UIManager.getColor("Button.select")
+
+                for (i in this.components) {
+                    if (i is JButton) {
+                        g.drawLine(centre.x, centre.y, i.x + (width / 2), i.y + (height / 2))
+                    }
+                }
+            }
+        }
+    }
     panel.layout = null
     panel.background = Color(0, 0, 0, 0)
     frame.add(panel)
@@ -35,6 +62,10 @@ fun main(args: Array<String>) {
 
     frame.extendedState = JFrame.MAXIMIZED_BOTH
 
+    val timer = Timer(30, ActionListener {
+        frame.repaint()
+    }).start()
+
     frame.pack()
     frame.isVisible = true
 
@@ -43,23 +74,23 @@ fun main(args: Array<String>) {
             if (e.keyChar.toLowerCase() == 'e') {
                 panel.removeAll()
 
+                radialOpen = !radialOpen
+
                 val mouseInfo = MouseInfo.getPointerInfo().location
+                centre = mouseInfo
 
-                val width = 1 * Toolkit.getDefaultToolkit().screenResolution
-                val height = 1 * Toolkit.getDefaultToolkit().screenResolution / 2
+                if (radialOpen) {
+                    for ((index, i) in resultXML.buttonList.withIndex()) {
+                        panel.add(JButton(i.text).apply {
+                            background = Color(0, 0, 0, 0)
 
-                val radius = 10 * Toolkit.getDefaultToolkit().screenResolution / 10
+                            val t = 2 * Math.PI * index / resultXML.buttonList.size
+                            val x = Math.round(mouseInfo.x + radius * Math.cos(t)).toInt()
+                            val y = Math.round(mouseInfo.y + radius * Math.sin(t)).toInt()
 
-                for ((index, i) in resultXML.buttonList.withIndex()) {
-                    panel.add(JButton(i.text).apply {
-                        background = Color(0, 0, 0, 0)
-
-                        val t = 2 * Math.PI * index / resultXML.buttonList.size
-                        val x = Math.round(mouseInfo.x + radius * Math.cos(t)).toInt()
-                        val y = Math.round(mouseInfo.y + radius * Math.sin(t)).toInt()
-
-                        setBounds(x - (width / 2), y - (height / 2), width, height)
-                    })
+                            setBounds(x - (width / 2), y - (height / 2), width, height)
+                        })
+                    }
                 }
 
                 panel.revalidate()
