@@ -33,7 +33,7 @@ fun main(args: Array<String>) {
     val radius = 10 * Toolkit.getDefaultToolkit().screenResolution / 8
 
     var radialOpen = false
-    var centre = Point()
+    var centre: Point
     var selectedPoint = Point()
 
     // Frame
@@ -132,6 +132,7 @@ fun main(args: Array<String>) {
                                                     i.buttonList.size * Toolkit.getDefaultToolkit().screenResolution / 5)
 
                                             this.shownSub = true
+                                            selectedPoint = Point(this.location.x + (width / 2), this.location.y + (height / 2))
                                         }
                                         else {
                                             val removeList = mutableListOf<RadialButton>()
@@ -155,6 +156,13 @@ fun main(args: Array<String>) {
                                             }
 
                                             this.shownSub = false
+
+                                            selectedPoint = if (this.parent != null) {
+                                                Point(this.parent!!.location.x + (width / 2), this.parent!!.location.y + (height / 2))
+                                            }
+                                            else {
+                                                centre
+                                            }
                                         }
                                     }
                                 }
