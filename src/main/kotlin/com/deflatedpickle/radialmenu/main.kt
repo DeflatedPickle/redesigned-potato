@@ -5,14 +5,8 @@ import java.awt.*
 import java.awt.event.ActionListener
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
-import java.util.*
-import javax.swing.JButton
-import javax.swing.JFrame
-import javax.swing.JPanel
-import javax.swing.Timer
-import javax.swing.UIManager
+import javax.swing.*
 import kotlin.math.pow
-import kotlin.math.sqrt
 
 
 fun insideRadius(origin: Point, point: Point, radius: Double): Boolean {
@@ -56,11 +50,14 @@ fun main(args: Array<String>) {
             if (resultXML.connections) {
                 g.color = UIManager.getColor("Button.select")
 
-                for (i in this.components) {
-                    if (i is JButton) {
-                        g.drawLine(centre.x, centre.y, i.x + (width / 2), i.y + (height / 2))
+                fun drawLines(list: List<RadialButton>) {
+                    for (i in list) {
+                        g.drawLine(i.parentPoint.x, i.parentPoint.y, i.x + (width / 2), i.y + (height / 2))
+
+                        drawLines(i.children)
                     }
                 }
+                drawLines(resultXML.buttonList.map { it.radialButton })
             }
 
             if (resultXML.follower) {
@@ -105,17 +102,66 @@ fun main(args: Array<String>) {
                 selectedPoint = centre
 
                 if (radialOpen) {
-                    for ((index, i) in resultXML.buttonList.withIndex()) {
-                        panel.add(JButton(i.text).apply {
-                            background = Color(0, 0, 0, 0)
+                    fun addButtonRing(parent: JComponent, list: List<Button>, origin: Point, radius: Int) {
+                        for ((index, i) in list.withIndex()) {
+                            panel.add(RadialButton(i.text).apply {
+                                i.radialButton = this
 
-                            val t = 2 * Math.PI * index / resultXML.buttonList.size
-                            val x = Math.round(mouseInfo.x + radius * Math.cos(t)).toInt()
-                            val y = Math.round(mouseInfo.y + radius * Math.sin(t)).toInt()
+                                background = Color(0, 0, 0, 0)
 
-                            setBounds(x - (width / 2), y - (height / 2), width, height)
-                        })
+                                val t = 2 * Math.PI * index / list.size
+                                val x = Math.round(origin.x + radius * Math.cos(t)).toInt()
+                                val y = Math.round(origin.y + radius * Math.sin(t)).toInt()
+
+                                setBounds(x - (width / 2), y - (height / 2), width, height)
+
+                                if(parent is RadialButton) {
+                                    this.parent = parent
+                                    this.parentPoint = parent.location
+                                    parent.children.add(this)
+                                }
+                                else {
+                                    this.parentPoint = centre
+                                }
+
+                                if (i.buttonList != null) {
+                                    addActionListener {
+                                        if (!this.shownSub) {
+                                            addButtonRing(this, i.buttonList, Point(x + ((radius * 120) / 100),
+                                                    y + ((radius * 120) / 100)),
+                                                    i.buttonList.size * Toolkit.getDefaultToolkit().screenResolution / 5)
+
+                                            this.shownSub = true
+                                        }
+                                        else {
+                                            val removeList = mutableListOf<RadialButton>()
+
+                                            fun destroyTheChildren(list: List<RadialButton>) {
+                                                for (child in list) {
+                                                    if (child.children.isNotEmpty()) {
+                                                        destroyTheChildren(child.children)
+                                                    }
+
+                                                    removeList.add(child)
+                                                    panel.remove(child)
+                                                }
+                                            }
+                                            destroyTheChildren(this.children)
+
+                                            for(removedButton in removeList) {
+                                                if (removedButton.parent is RadialButton) {
+                                                    (removedButton.parent as RadialButton).children.remove(removedButton)
+                                                }
+                                            }
+
+                                            this.shownSub = false
+                                        }
+                                    }
+                                }
+                            })
+                        }
                     }
+                    addButtonRing(panel, resultXML.buttonList, mouseInfo, resultXML.buttonList.size * Toolkit.getDefaultToolkit().screenResolution / 5)
                 }
 
                 panel.revalidate()

@@ -1,8 +1,16 @@
 <!-- Follower: creates a line that follows the nearest button from the mouse pointer to the mouse pointer /-->
 <!-- Connections: draws a line between each child to their parent /-->
-<radial follower="true" connections="false">
+<radial follower="true" connections="true">
     <!-- A set of buttons to circle the mouse pointer /-->
-    <button text="Button 1"/>
+    <button text="Button 1">
+        <button text="Sub Button 1"/>
+        <button text="Sub Button 2">
+            <button text="Sub Sub Button 1"/>
+            <button text="Sub Sub Button 2"/>
+        </button>
+        <button text="Sub Button 3"/>
+    </button>
+
     <button text="Button 2"/>
     <button text="Button 3"/>
     <button text="Button 4"/>
