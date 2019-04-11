@@ -11,6 +11,18 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.Timer
 import javax.swing.UIManager
+import kotlin.math.pow
+import kotlin.math.sqrt
+
+
+fun insideRadius(origin: Point, point: Point, radius: Double): Boolean {
+    if ((origin.x - point.x).toDouble().pow(2)
+            + (origin.y - point.y).toDouble().pow(2)
+            <= radius.pow(2)) {
+        return true
+    }
+    return false
+}
 
 
 fun main(args: Array<String>) {
@@ -28,6 +40,7 @@ fun main(args: Array<String>) {
 
     var radialOpen = false
     var centre = Point()
+    var selectedPoint = Point()
 
     // Frame
     val frame = JFrame("RadialMenu")
@@ -38,6 +51,8 @@ fun main(args: Array<String>) {
 
             if (!radialOpen) return
 
+            val mouseInfo = MouseInfo.getPointerInfo().location
+
             if (resultXML.connections) {
                 g.color = UIManager.getColor("Button.select")
 
@@ -45,6 +60,14 @@ fun main(args: Array<String>) {
                     if (i is JButton) {
                         g.drawLine(centre.x, centre.y, i.x + (width / 2), i.y + (height / 2))
                     }
+                }
+            }
+
+            if (resultXML.follower) {
+                // Test if the mouse is close enough to the selected point
+                if (insideRadius(selectedPoint, mouseInfo, (radius * (Toolkit.getDefaultToolkit().screenResolution / 34)).toDouble())) {
+                    g.color = UIManager.getColor("Button.select")
+                    g.drawLine(selectedPoint.x, selectedPoint.y, mouseInfo.x, mouseInfo.y)
                 }
             }
         }
@@ -78,6 +101,8 @@ fun main(args: Array<String>) {
 
                 val mouseInfo = MouseInfo.getPointerInfo().location
                 centre = mouseInfo
+
+                selectedPoint = centre
 
                 if (radialOpen) {
                     for ((index, i) in resultXML.buttonList.withIndex()) {

@@ -13,11 +13,16 @@ public class Radial {
     @XStreamAsAttribute
     public Boolean connections;
 
+    @XStreamAlias("follower")
+    @XStreamAsAttribute
+    public Boolean follower;
+
     @XStreamImplicit(itemFieldName = "button")
     public List<Button> buttonList;
 
-    public Radial(Boolean connections, Button... buttons) {
+    public Radial(Boolean connections, Boolean follower, Button... buttons) {
         this.connections = connections;
+        this.follower = follower;
         this.buttonList = Arrays.asList(buttons);
     }
 }
