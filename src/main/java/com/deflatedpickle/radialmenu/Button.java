@@ -13,13 +13,18 @@ public class Button {
     @XStreamAsAttribute
     public String text;
 
+    @XStreamAlias("command")
+    @XStreamAsAttribute
+    public String command;
+
     @XStreamImplicit(itemFieldName = "button")
     public List<Button> buttonList;
 
     public RadialButton radialButton;
 
-    public Button(String text, Button... buttons) {
+    public Button(String text, String command, Button... buttons) {
         this.text = text;
+        this.command = command;
         this.buttonList = Arrays.asList(buttons);
     }
 }

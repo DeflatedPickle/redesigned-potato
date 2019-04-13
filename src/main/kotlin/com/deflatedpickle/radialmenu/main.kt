@@ -102,12 +102,11 @@ fun main(args: Array<String>) {
                 selectedPoint = centre
 
                 if (radialOpen) {
-                    fun addButtonRing(parent: JComponent, list: List<Button>, origin: Point, radius: Int) {
+                    fun addButtonRing(parent: JComponent, list: List<Button>, origin: Point, radius: Float) {
                         for ((index, i) in list.withIndex()) {
                             panel.add(RadialButton(i.text).apply {
+                                this.button = i
                                 i.radialButton = this
-
-                                background = Color(0, 0, 0, 0)
 
                                 val t = 2 * Math.PI * index / list.size
                                 val x = Math.round(origin.x + radius * Math.cos(t)).toInt()
@@ -127,9 +126,7 @@ fun main(args: Array<String>) {
                                 if (i.buttonList != null) {
                                     addActionListener {
                                         if (!this.shownSub) {
-                                            addButtonRing(this, i.buttonList, Point(x + ((radius * 120) / 100),
-                                                    y + ((radius * 120) / 100)),
-                                                    i.buttonList.size * Toolkit.getDefaultToolkit().screenResolution / 5)
+                                            addButtonRing(this, i.buttonList, Point(x, y), radius)
 
                                             this.shownSub = true
                                             selectedPoint = Point(this.location.x + (width / 2), this.location.y + (height / 2))
@@ -166,10 +163,15 @@ fun main(args: Array<String>) {
                                         }
                                     }
                                 }
+                                else {
+                                    addActionListener {
+                                        Runtime.getRuntime().exec(i.command)
+                                    }
+                                }
                             })
                         }
                     }
-                    addButtonRing(panel, resultXML.buttonList, mouseInfo, resultXML.buttonList.size * Toolkit.getDefaultToolkit().screenResolution / 5)
+                    addButtonRing(panel, resultXML.buttonList, mouseInfo, resultXML.buttonList.size * Toolkit.getDefaultToolkit().screenResolution / 5f)
                 }
 
                 panel.revalidate()

@@ -3,7 +3,7 @@
 <radial follower="true" connections="true">
     <!-- A set of buttons to circle the mouse pointer /-->
     <button text="Button 1">
-        <button text="Sub Button 1"/>
+        <button text="Sub Button 1" command="notepad.exe"/>
         <button text="Sub Button 2">
             <button text="Sub Sub Button 1"/>
             <button text="Sub Sub Button 2"/>
@@ -14,6 +14,8 @@
     <button text="Button 2"/>
     <button text="Button 3"/>
     <button text="Button 4"/>
-    <button text="Button 5"/>
+    <button text="Button 5">
+        <button text="Sub Button 4"/>
+    </button>
     <button text="Button 6"/>
 </radial>
